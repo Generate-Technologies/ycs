@@ -163,7 +163,6 @@ namespace Ycs
                 case 121: // boolean false
                     return false;
                 case 123: // Float64
-#if NETSTANDARD2_0
                     var dBytes = new byte[8];
                     stream._ReadBytes(dBytes);
 
@@ -173,19 +172,7 @@ namespace Ycs
                     }
 
                     return BitConverter.ToDouble(dBytes, 0);
-#elif NETSTANDARD2_1
-                    Span<byte> dBytes = stackalloc byte[8];
-                    stream._ReadBytes(dBytes);
-
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        dBytes.Reverse();
-                    }
-
-                    return BitConverter.ToDouble(dBytes);
-#endif // NETSTANDARD2_0
                 case 124: // Float32
-#if NETSTANDARD2_0
                     var fBytes = new byte[4];
                     stream._ReadBytes(fBytes);
 
@@ -195,17 +182,6 @@ namespace Ycs
                     }
 
                     return BitConverter.ToSingle(fBytes, 0);
-#elif NETSTANDARD2_1
-                    Span<byte> fBytes = stackalloc byte[4];
-                    stream._ReadBytes(fBytes);
-
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        fBytes.Reverse();
-                    }
-
-                    return BitConverter.ToSingle(fBytes);
-#endif // NETSTANDARD2_0
                 case 125: // integer
                     return stream.ReadVarInt().Value;
                 case 126: // null
@@ -289,7 +265,6 @@ namespace Ycs
         /// within the stream by the number of bytes read.
         /// </summary>
         /// <exception cref="EndOfStreamException">End of stream reached.</exception>
-#if NETSTANDARD2_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void _ReadBytes(this Stream stream, byte[] buffer)
         {
@@ -303,20 +278,5 @@ namespace Ycs
                 throw new EndOfStreamException();
             }
         }
-#elif NETSTANDARD2_1
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void _ReadBytes(this Stream stream, Span<byte> buffer)
-        {
-            if (buffer.Length == 0)
-            {
-                return;
-            }
-
-            if (buffer.Length != stream.Read(buffer))
-            {
-                throw new EndOfStreamException();
-            }
-        }
-#endif // NETSTANDARD2_0
     }
 }
