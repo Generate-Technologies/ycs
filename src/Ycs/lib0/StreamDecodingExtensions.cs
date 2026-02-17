@@ -207,7 +207,7 @@ namespace Ycs
                     return BitConverter.ToSingle(fBytes);
 #endif // NETSTANDARD2_0
                 case 125: // integer
-                    return (int)stream.ReadVarInt().Value;
+                    return stream.ReadVarInt().Value;
                 case 126: // null
                 case 127: // undefined
                     return null;

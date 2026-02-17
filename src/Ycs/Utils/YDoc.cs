@@ -320,6 +320,30 @@ namespace Ycs
         }
 
         /// <summary>
+        /// Read and apply a V1-encoded document update (produced by Yjs <c>encodeStateAsUpdate</c>).
+        /// Added locally — not part of upstream yjs/ycs.
+        /// </summary>
+        public void ApplyUpdateV1(Stream input, object transactionOrigin = null, bool local = false)
+        {
+            Transact(tr =>
+            {
+                using (var structDecoder = new UpdateDecoderV1(input))
+                {
+                    EncodingUtils.ReadStructs(structDecoder, tr, Store);
+                    Store.ReadAndApplyDeleteSet(structDecoder, tr);
+                }
+            }, transactionOrigin, local);
+        }
+
+        public void ApplyUpdateV1(byte[] update, object transactionOrigin = null, bool local = false)
+        {
+            using (var input = new MemoryStream(update, writable: false))
+            {
+                ApplyUpdateV1(input, transactionOrigin, local);
+            }
+        }
+
+        /// <summary>
         /// Write all the document as a single update message that can be applied on the remote document.
         /// If you specify the state of the remote client, it will only write the operations that are missing.
         /// <br/>
